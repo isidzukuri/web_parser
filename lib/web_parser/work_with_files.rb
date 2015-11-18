@@ -10,11 +10,11 @@ module WebParser
 				file.puts(data)
 				file.close
 			rescue Errno::EMFILE => e
-				retry
+				# retry
 				ObjectSpace.each_object(File) do |f|
 				  puts "%s: %d" % [f.path, f.fileno] unless f.closed?
 				end
-				# raise Errno::EMFILE.new(e.message)
+				raise Errno::EMFILE.new(e.message)
 			end
 		end
 
