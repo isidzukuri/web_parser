@@ -8,9 +8,10 @@ module WebParser
 			begin
 				file=File.new(path, "w+")
 				file.puts(data)
+				size = file.size
 				file.close
+				size
 			rescue Errno::EMFILE => e
-				# retry
 				ObjectSpace.each_object(File) do |f|
 				  puts "%s: %d" % [f.path, f.fileno] unless f.closed?
 				end
@@ -20,6 +21,11 @@ module WebParser
 
 		def create_dir path
 			FileUtils.mkdir_p path
+		end
+
+		def copy_file(src, dst)
+		  create_dir(File.dirname(dst))
+		  FileUtils.cp(src, dst)
 		end
 
 		def extract_zip file_body
@@ -55,6 +61,16 @@ module WebParser
 
 		def encode str
 			str
+		end
+
+		def read_file path
+				data = nil
+				if File.exist?(path)
+					file = File.open(path)
+					data = file.read
+					file.close
+				end
+				data
 		end
 		
 	end

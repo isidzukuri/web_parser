@@ -49,4 +49,6 @@ gem 'zip'
 gem 'zipruby'
 gem 'htmlentities'
 gem 'whatlanguage'
+gem 'google-translate'
+gem 'unidecoder'
 
