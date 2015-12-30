@@ -2,16 +2,17 @@ class LibraryDb < ActiveRecord::Base
 	self.abstract_class = true
 	include WebParser::WorkWithFiles, GoogleTranslator
 
-	establish_connection :javalibr_pl
+	# establish_connection :javalibr_pl
+	establish_connection :javalibr_esokrat
 
 	def transliterate str
 		str.to_ascii
 	end
 
 	def create_seo_name str, column_key = 'seo'
-		seo_name = transliterate(str).parameterize[0..95]
+		seo_name = transliterate(str).parameterize[0..75]
 		if self.class.where({column_key => seo_name}).first
-			seo_name = create_seo_name("#{seo_name}_1", column_key)
+			seo_name = create_seo_name("1_#{seo_name}", column_key)
 		end
 		seo_name
 	end

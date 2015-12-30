@@ -21,6 +21,10 @@ javalibr_pl:
   <<: *default
   database: javalibr_pl
   # database: db/development.sqlite3
+  
+javalibr_esokrat:
+  <<: *default
+  database: javalibr_esokrat
 
 development:
   <<: *default
