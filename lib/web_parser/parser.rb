@@ -11,13 +11,14 @@ module WebParser
 		    super
 		end
 
-		def parse url, item_attr, paginator_attr = nil
+		def parse url, item_attr, paginator_attr = nil, category_attr = nil
 			sitemap = Sitemap.new(:threads_number => @threads_number)
-			@url_queue = sitemap.get_urls_queue(url, item_attr, paginator_attr, @sitemap_from_file)
+			@url_queue = sitemap.get_urls_queue(url, item_attr, paginator_attr, category_attr, @sitemap_from_file)
 			@host = sitemap.host
 			# RubyProf.measure_mode = RubyProf::WALL_TIME
 			# RubyProf.start
 			threads = []
+			@fails = 0
 			@threads_number.times do 
 				threads << Thread.new do
 					agent = Mechanize.new
@@ -26,16 +27,17 @@ module WebParser
 						@log[next_url] = []
 						@log[next_url] << "#{@url_queue.shifted}/#{@url_queue.total}".green
 						begin
-					   		parse_one(next_url, agent)
-					   		puts "[#{@log[next_url][0]}] #{next_url}"
-					   	rescue WebParserException => e
-					   		@log[next_url] << e.message.to_s.red
-					   		puts "[#{@log[next_url][0].red}] #{next_url}"
-					   		@log[next_url].each_with_index{|message,i| puts "\t- #{message}" if i > 0 }
-					   	end
-					   	
-					   	# raise Exception #if @url_queue.shifted == 100
-					   	next_url = @url_queue.next_item
+				   		parse_one(next_url, agent)
+				   		puts "[#{@log[next_url][0]}] #{next_url}"
+				   	rescue WebParserException => e
+				   		@log[next_url] << e.message.to_s.red
+				   		puts "[#{@log[next_url][0].red}] #{next_url}"
+				   		@fails +=1
+				   		@log[next_url].each_with_index{|message,i| puts "\t- #{message}" if i > 0 }
+				   	end
+				   	
+				   	# raise Exception #if @url_queue.shifted == 100
+				   	next_url = @url_queue.next_item
 					end
 				end
 			end
@@ -43,6 +45,7 @@ module WebParser
 			# profiler = RubyProf.stop
 			# printer = RubyProf::GraphPrinter.new(profiler)
 			# printer.print(STDOUT, {})
+			puts "fails: #{@fails}".red
 			puts "[end]".green
 		end
 

@@ -8,23 +8,35 @@ module WebParser
 			agent = @agent if !agent
 			if !use_cache
 				message = "Crawling page #{url}".green
-				defined?(@log) ? (@log[url] << message) : (puts message)
+				(defined?(@log) && @log[url].present?) ? (@log[url] << message) : (puts message)
 				begin
 					page = agent.get(url)
 				rescue NoMethodError
 					raise NoMethodError.new("Parameter 'agent' should be Mechanize object")
 				# rescue 
-					# # if network error or not expected page
-					# # change proxy 
-					# agent = change_proxy(agent,url)
-					# # and try again
-					# page = agent.get(url)
-					# # if not succeed raise exception
+				# 	# if network error or not expected page
+				# 	# change proxy 
+				# 	agent = change_proxy(agent,url)
+				# 	# and try again
+				# 	page = agent.get(url)
+				# 	# if not succeed raise exception
 				end
 			else
 				if !page = CACHE.read(url)
-					page = agent.get(url)
-					CACHE.write(url, page.body)
+					# begin
+						page = agent.get(url)
+						CACHE.write(url, page.body)
+					# rescue NoMethodError
+					# 	raise NoMethodError.new("Parameter 'agent' should be Mechanize object")
+					# rescue 
+					# 	# if network error or not expected page
+					# 	# change proxy 
+					# 	agent = change_proxy(agent,url)
+					# 	# and try again
+					# 	page = agent.get(url)
+					# 	CACHE.write(url, page.body)
+					# 	# if not succeed raise exception
+					# end
 				else
 					page = Mechanize::Page.new(URI(url),{'content-type'=>'text/html'},page,nil,agent)
 				end
@@ -49,8 +61,13 @@ module WebParser
 			agent = @agent if !agent
 			agent.pluggable_parser.default = Mechanize::Download
 			file = agent.get(url)
-			file_body = file.body.force_encoding('UTF-8')
-			append("public/webparser/downloads/#{@host}/#{file.filename}", file_body) if save_file
+			# file_body = file.body.force_encoding('UTF-8')
+			begin
+				file_body = file.body.encode('UTF-8')
+				append("public/webparser/downloads/#{@host}/#{file.filename}", file_body) if save_file
+			rescue
+				file_body = nil
+			end
 			# if save_file
 			# 	dir = "public/webparser/downloads/#{@host}/"
 			# 	create_dir dir

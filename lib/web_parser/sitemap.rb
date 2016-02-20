@@ -3,9 +3,9 @@ module WebParser
 		include PageParser, ThreadLock, WorkWithFiles
 		attr_reader :urls, :agent, :host
 
-		def get_urls_queue url, item_attr, paginator_attr, from_file = nil
+		def get_urls_queue url, item_attr, paginator_attr, category_attr = nil, from_file = nil
 			set_host(url)
-			urls = from_file ? get_site_urls_from_file() : get_site_urls(url, item_attr, paginator_attr)
+			urls = from_file ? get_site_urls_from_file() : get_site_urls(url, item_attr, paginator_attr, category_attr)
 			SimpleQueue.new(urls)
 		end
 
@@ -15,20 +15,32 @@ module WebParser
 		end
 
 		def set_host url
-			@host = URI.parse(url).host.downcase
+			uri = URI.parse(url)
+			@scheme = uri.scheme
+			@host = uri.host.downcase
 		end
 		
-		def get_site_urls start_url, item_attr, paginator_attr
+		def get_site_urls start_url, item_attr, paginator_attr = nil, category_attr = nil
 			puts "Searching for links".black.on_light_green
 			set_host(start_url) if !@host
 			@urls = []
 			@agent = Mechanize.new
 
-			if paginator_attr
+			if category_attr
+				puts "get_urls_from_categories".black.on_light_green
+				pages_with_paginator, agent = get_urls_from_categories(start_url, category_attr)
+				ap pages_with_paginator
+
+				urls = []
+				pages_with_paginator.each do |item|
+					urls += get_urls_from_paginator(item, paginator_attr, agent)
+				end
+				urls.uniq!
+			elsif paginator_attr
 				puts "get_urls_from_paginator".black.on_light_green
 				urls = get_urls_from_paginator(start_url, paginator_attr)
 			else
-				urls = [url]
+				urls = [start_url]
 			end
 			@url_queue = SimpleQueue.new(urls, @lock)
 
@@ -64,7 +76,7 @@ module WebParser
 			urls = []
 			page, agent = get_page(url, agent, use_cache)
 			links = page.links_with(attribute)
-			urls = links.map{|l| l.href} if links
+			urls = links.map{|l| l.href.include?(@host) ? l.href : "#{@scheme}://#{@host}#{l.href}"} if links
 			[urls, agent]
 		end
 
@@ -81,6 +93,11 @@ module WebParser
 				get_urls_from_paginator(url, attribute, agent)
 			end
 			@paginator_urls
+		end
+
+		def get_urls_from_categories url, attribute, agent = nil
+			puts "#{url} checking categories".green
+			urls_from_page_by_attribute(url, attribute, agent)
 		end
 		
 		def save_urls urls
