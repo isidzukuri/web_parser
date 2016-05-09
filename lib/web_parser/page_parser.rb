@@ -13,7 +13,8 @@ module WebParser
 					page = agent.get(url)
 				rescue NoMethodError
 					raise NoMethodError.new("Parameter 'agent' should be Mechanize object")
-				# rescue 
+				rescue 
+					page = nil
 				# 	# if network error or not expected page
 				# 	# change proxy 
 				# 	agent = change_proxy(agent,url)
