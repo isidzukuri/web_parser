@@ -7,7 +7,7 @@ module WebParser
 				self.instance_eval("def #{k};@#{k};end")
 		        # self.instance_eval("def #{k}=(val);@#{k}=val;end")
 			end
-			@use_cache = false
+			@use_cache = true
 		end
 		
 	end

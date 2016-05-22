@@ -75,8 +75,17 @@ module WebParser
 			use_cache = use_cache.nil? ? @use_cache : use_cache
 			urls = []
 			page, agent = get_page(url, agent, use_cache)
-			links = page.links_with(attribute)
-			urls = links.map{|l| l.href.include?(@host) ? l.href : "#{@scheme}://#{@host}#{l.href}"} if links
+			links = attribute.is_a?(Hash) ? page.links_with(attribute) : page.search(attribute)
+			if links
+				urls = links.map do |l| 
+					if attribute.is_a?(Hash)
+						l.href.include?(@host) ? l.href : "#{@scheme}://#{@host}#{l.href}"
+					else
+						href = l.attribute('href').to_s
+						href.include?(@host) ? href : "#{@scheme}://#{@host}#{href}"
+					end
+				end
+			end
 			[urls, agent]
 		end
 
