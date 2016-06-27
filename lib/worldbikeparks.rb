@@ -32,7 +32,7 @@ class Worldbikeparks < WebParser::Parser
 		description_block = html.search('#ContentPlaceHolder_Main_ContentPlaceHolder_ParkPage_Panel_Introduction')	
 		if description_block && (desc = description_block.first)
 			iframes = desc.search('iframe')
-			iframes.map{|ifr| videos << ifr.attribute('src').to_s} if iframes
+			iframes.map{|ifr| videos << ifr.attribute('src').to_s.gsub(/\A\/\//, '')} if iframes
 			description = Sanitize.fragment(desc.inner_html, :elements => ['b','a','ul','ol','li','p','br'], :attributes => {'a'=> ['href', 'target']}).strip
 		end
 
@@ -115,7 +115,7 @@ class Worldbikeparks < WebParser::Parser
 		html = page.first
 
 		if (videos_hrefs = html.search('#dvideos a')) && videos_hrefs.first
-			videos_hrefs.map{|v| videos << v.attribute('href').to_s}
+			videos_hrefs.map{|v| videos << v.attribute('href').to_s.gsub(/\A\/\//, '')}
 		end
 
 		if (photos = html.search('.am-container img')) && photos.first
@@ -139,7 +139,7 @@ class Worldbikeparks < WebParser::Parser
 			:uplift => uplift,
 			:trail => trail,
 			:trail_difficulty => trail_difficulty,
-			:videos => videos,
+			:videos => videos.uniq,
 			:folder => folder,
 			:source => source
 		}

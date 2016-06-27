@@ -9,19 +9,20 @@ class Moredirt < WebParser::Parser
 
 	def parse_now
 		@types = [
-			{:id=>"7", :title => "4X/Duel Tracks"},
+			{:id=>"7", :title => "4X/Dual Slalom"},
 			{:id=>"6", :title => "Bike Parks"},
-			{:id=>"2", :title => "BMX Tracks"},
-			{:id=>"5", :title => "DH Trails"},
+			{:id=>"2", :title => "BMX Track"},
+			{:id=>"5", :title => "Downhill"},
 			{:id=>"3", :title => "Dirt Jumps"},
-			{:id=>"8", :title => "Family Trails"},
+			{:id=>"8", :title => "Family Trail"},
 			{:id=>"11", :title => "Freeride"},
-			{:id=>"15", :title => "MTB Uplifts"},
-			{:id=>"13", :title => "Pump Tracks"},
-			{:id=>"9", :title => "Skate Parks"},
+			{:id=>"15", :title => "MTB Uplift"},
+			{:id=>"13", :title => "Pump Track"},
+			{:id=>"9", :title => "Skate Park"},
 			{:id=>"12", :title => "Skills Area"},
-			{:id=>"4", :title => "XC Trails"}
+			{:id=>"4", :title => "Cross Country (XC)"}
 		]
+
 
 		# http://www.moredirt.com/region/United-Kingdom/trails/?trail_type=0&sub_location_id=0&page=0
 		@countries = [
