@@ -41,46 +41,12 @@ class TrailforksTrails < WebParser::Parser
 
 
 	def parse_one url, agent
-		
-		# return if @c >= 50643
-	# @trails = []
-
-	# @difficulties = {
-	# 	'easy' => ['Green', 'White', 'Access Road/Trail'],
-	# 	'moderate' => ['Blue', 'Secondary Access Road/Trail', 'Red'],
-	# 	'difficult' => ['Black', 'Black Diamond', 'Proline', 'Advanced'],
-	# 	'pro' => ['Double Black Diamond']
-	# }
-
-	# @types = {
-	# 	"mtb" => ['Fat'],
-	# 	"4X/Dual Slalom" => [],
-	# 	"BMX Track" => [],
-	# 	"Downhill" => ['DH'],
-	# 	"Dirt Jumps" => ['DJ'],
-	# 	"Freeride" => [],
-	# 	"Pump Track" => [],
-	# 	"Skate Park" => [],
-	# 	"Skills Area" => [],
-	# 	"Cross Country (XC)" => ['XC'],
-	# 	"Bike Parks" => [],
-	# 	"Family Trail" => ['RD'],
-	# 	"MTB Uplift" => [],
-	# 	"Enduro" => ['AM'],
-	# }
-	# url = "http://www.trailforks.com/trails/world-cup-17982/"
-	# agent = Mechanize.new
-
-
-
 		page =  get_page url, agent, true
 		return if !page || !page.first
 		html = page.first
 		folder = url.split('/').last.gsub(/[^A-Za-z]/, '')
 		source = url
-# return html
 
-# ap url
 		title = ''
 		title_block = html.search('#trailtitle')	
 		return if !title_block.present?
@@ -88,13 +54,11 @@ class TrailforksTrails < WebParser::Parser
 			title = title.text.to_s.strip
 		end
 
-
 		description = ''
 		description_block = html.search('#trail_description')	
 		if description_block && (desc = description_block.first)
 			description = Sanitize.fragment(desc.inner_html, :elements => ['b','ul','ol','li','p','br']).strip
 		end
-
 
 		gpx_data = nil
 		block_with_coords = html.search('#trail_area1')
@@ -102,7 +66,6 @@ class TrailforksTrails < WebParser::Parser
 			code = text.first.text.gsub(",                        ", '').gsub("\n                        ", '')[/\[{id(.*?)}\]/]
 			gpx_data = eval(code) if code.present?
 		end
-
 
 		trail_difficulty, park_title = ''
 		trail_types = []
